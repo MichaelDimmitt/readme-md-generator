@@ -7,13 +7,16 @@ const isNil = require('lodash/isNil')
  * @param {Object} engines
  */
 const buildFormattedChoices = engines =>
-  Object.keys(engines)
-    .map(key => `${key} ${engines[key]}`)
-    .map(value => ({
-      name: value,
-      value,
-      checked: true
-    }))
+  isNil(engines)
+    ? null
+    : Object.keys(engines).map(key => ({
+        name: `${key} ${engines[key]}`,
+        value: {
+          name: key,
+          value: engines[key]
+        },
+        checked: true
+      }))
 
 /**
  * Check if projectInfos has engines properties
@@ -23,12 +26,10 @@ const buildFormattedChoices = engines =>
 const hasProjectInfosEngines = projectInfos =>
   !isNil(projectInfos.engines) && !isEmpty(projectInfos.engines)
 
-module.exports = projectInfos =>
-  hasProjectInfosEngines(projectInfos)
-    ? {
-        type: 'checkbox',
-        message: '⚠️  Project prerequisites',
-        name: 'projectPrerequisites',
-        choices: buildFormattedChoices(projectInfos.engines)
-      }
-    : undefined
+module.exports = projectInfos => ({
+  type: 'checkbox',
+  message: '⚠️  Project prerequisites',
+  name: 'projectPrerequisites',
+  choices: buildFormattedChoices(projectInfos.engines),
+  when: () => hasProjectInfosEngines(projectInfos)
+})
